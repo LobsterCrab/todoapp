@@ -2,6 +2,7 @@
 import UIKit
 // import CoreData
 import RealmSwift
+import ChameleonFramework
 
 
 class CategoryTableViewController: SwipeTableViewController{
@@ -21,6 +22,14 @@ class CategoryTableViewController: SwipeTableViewController{
 
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        guard let navBar = navigationController?.navigationBar else{
+            fatalError("Naigation controller not exist")
+        }
+        
+        navBar.backgroundColor = UIColor(hexString:"1D9BF6")
+    }
+    
     //MARK: - TablieView DataSource Methods
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -30,8 +39,20 @@ class CategoryTableViewController: SwipeTableViewController{
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
-        cell.textLabel?.text = categories?[indexPath.row].name ?? "Nothing here yet chief"
         
+        if let category = categories?[indexPath.row]{
+            
+            guard let categoryColour = UIColor(hexString: category.colour) else {fatalError()}
+            
+            cell.textLabel?.textColor = ContrastColorOf(categoryColour, returnFlat: true)
+            cell.backgroundColor = UIColor(hexString: categories?[indexPath.row].colour ?? "1D9BF6")
+            
+            cell.textLabel?.text = category.name
+        }
+        
+       
+        
+       
         return cell
     }
     
@@ -64,7 +85,7 @@ class CategoryTableViewController: SwipeTableViewController{
             
             let newCategory = Category()
             newCategory.name = textField.text!
-            
+            newCategory.colour = UIColor.randomFlat().hexValue()
             
             // Realm auto updates value no need for appending like in Core Data
             //self.categories.append(newCategory)

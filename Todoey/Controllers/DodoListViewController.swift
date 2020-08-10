@@ -3,6 +3,7 @@
 import UIKit
 import CoreData
 import RealmSwift
+import ChameleonFramework
 
 class TodoListViewController: SwipeTableViewController{
     
@@ -10,6 +11,7 @@ class TodoListViewController: SwipeTableViewController{
     //Core Data
     //var itemArray = [Item]()
     
+    @IBOutlet weak var searchBar: UISearchBar!
     let realm = try! Realm()
     
     //Legacy naming convention for clarity
@@ -19,7 +21,7 @@ class TodoListViewController: SwipeTableViewController{
     var selectedCategory: Category? {
         didSet{
             loadItems()
-            print("done it")
+            //print("done it")
         }
     }
     
@@ -39,6 +41,25 @@ class TodoListViewController: SwipeTableViewController{
 //            itemArray = items
 //        }
         
+        
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        if let colourHex = selectedCategory?.colour{
+            
+            title = selectedCategory!.name
+            
+            guard let navBar = navigationController?.navigationBar else {fatalError("no navigation controller")}
+            //print("i should be chnging!!!")
+            navBar.barTintColor = UIColor(hexString: colourHex)
+            
+            searchBar.barTintColor = UIColor(hexString: colourHex)
+            
+            if let navBarColour = UIColor(hexString: colourHex){
+                navBar.tintColor = ContrastColorOf(navBarColour,returnFlat: true)
+            }
+            
+        }
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -51,6 +72,13 @@ class TodoListViewController: SwipeTableViewController{
         
         if let item = itemArray?[indexPath.row] {
             cell.textLabel?.text = item.title
+            
+            if let colour = UIColor(hexString: selectedCategory!.colour)?.darken(byPercentage: CGFloat(indexPath.row)/CGFloat(itemArray!.count)){
+                 cell.backgroundColor = colour
+                cell.textLabel?.textColor = ContrastColorOf(colour, returnFlat: true)
+            }
+            
+           
             
             if item.done == true {
                 cell.accessoryType = .checkmark
